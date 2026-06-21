@@ -20,14 +20,20 @@ def get_operation():
 
 def calculate(first_number, operator, second_number):
     if operator == '+':
-        return first_number + second_number
+        result = float(first_number) + float(second_number)
     elif operator == '-':
-        return first_number - second_number
+        result = float(first_number) - float(second_number)
     elif operator == '*':
-        return first_number * second_number
+        result = float(first_number) * float(second_number)
     elif operator == '/':
-        return first_number / second_number
+        result = float(first_number) / float(second_number)
     
+    # if result > 10 ** 30:
+    #     return 'out of range'
+    elif result.is_integer():
+        return str(int(result))
+    else:
+        return str(result)
 
 if __name__ == '__main__':
     first_number = get_number()
