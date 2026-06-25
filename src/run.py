@@ -1,19 +1,12 @@
 import streamlit as st
+
 from main import calculate
-# st.markdown("""
-#     <style>
-#     html {zoom: 100%;}
-#     </style>
-# """, unsafe_allow_html=True)
+
 
 if 'result' not in st.session_state:
     st.session_state.result = '0'
-    input_number = ''
-    st.session_state.point_checker = True
-    st.session_state.operator = ''
     st.session_state.operation = False
     st.session_state.first_number = ''
-    st.session_state.rank = 8
 
 st.title(':abacus: CALCULATOR')
 box = st.empty()
@@ -41,8 +34,9 @@ with col1:
             st.session_state.result += '7'
         st.session_state.operation = False
 
-    if st.button('=', use_container_width=True):
-        st.session_state.result = '='
+    if st.button('=', use_container_width=True) and st.session_state.first_number and not st.session_state.operation:
+        st.session_state.result = calculate(st.session_state.first_number, st.session_state.operator, st.session_state.result)
+        st.session_state.first_number = ''
 
 with col2:
     if st.button('2', use_container_width=True):
@@ -95,13 +89,18 @@ with col3:
             st.session_state.result += '9'
         st.session_state.operation = False
     
-    if st.button('.', use_container_width=True) and st.session_state.point_checker:
-        st.session_state.point_checker = False
-        st.session_state.result += '.'
+    if st.button('.', use_container_width=True):
+        if st.session_state.operation:
+            st.session_state.result = '0.'
+            st.session_state.operation = False
+        elif '.' not in st.session_state.result:
+            st.session_state.result += '.'
+
 
 
 with col5:
     if st.button('+', use_container_width=True):
+
         if st.session_state.operation:
             st.session_state.result = st.session_state.result[:-4]
         elif st.session_state.first_number:
@@ -111,9 +110,12 @@ with col5:
             st.session_state.first_number = st.session_state.result
         else:
             st.session_state.first_number = st.session_state.result
+        if list(st.session_state.result)[-1] == '.':
+            st.session_state.result = st.session_state.result[:-1]
         st.session_state.operation = True
         st.session_state.operator = '+'
         st.session_state.result += '   +'
+
     
     
     if st.button('-', use_container_width=True):
@@ -126,6 +128,8 @@ with col5:
             st.session_state.first_number = st.session_state.result
         else:
             st.session_state.first_number = st.session_state.result
+        if list(st.session_state.result)[-1] == '.':
+            st.session_state.result = st.session_state.result[:-1]
         st.session_state.operation = True
         st.session_state.operator = '-'
         st.session_state.result += '   -'
@@ -140,6 +144,8 @@ with col5:
             st.session_state.first_number = st.session_state.result
         else:
             st.session_state.first_number = st.session_state.result
+        if list(st.session_state.result)[-1] == '.':
+            st.session_state.result = st.session_state.result[:-1]
         st.session_state.operation = True
         st.session_state.operator = '*'
         st.session_state.result += '   *'
@@ -154,9 +160,33 @@ with col5:
             st.session_state.first_number = st.session_state.result
         else:
             st.session_state.first_number = st.session_state.result
+        if list(st.session_state.result)[-1] == '.':
+            st.session_state.result = st.session_state.result[:-1]
         st.session_state.operation = True
         st.session_state.operator = '/'
         st.session_state.result += '   /'
 
-box.text_input('',value=st.session_state.result ,disabled=True,width=320)
+with col6:
+    if st.button('c', use_container_width=True):
+         st.session_state.result = '0'
+         st.session_state.operation = False
+         st.session_state.first_number = ''
+    if st.button('<-', use_container_width=True):
+        if st.session_state.operation:
+            st.session_state.result = st.session_state.result[:-4]
+            st.session_state.operation = False
+            st.session_state.first_number = ''
+        elif st.session_state.result:
+            st.session_state.result = st.session_state.result[:-1]
+            if not st.session_state.result:
+                st.session_state.result = '0'
 
+
+if 'N' in list(st.session_state.result):
+    st.session_state.result = st.session_state.result[:-1]
+    box.text_input('',value=st.session_state.result ,disabled=True,width=320)
+    st.session_state.result = '0'
+    st.session_state.operation = False
+    st.session_state.first_number = ''
+else:
+    box.text_input('',value=st.session_state.result ,disabled=True,width=320)

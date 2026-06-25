@@ -19,6 +19,8 @@ def get_operation():
 
 
 def calculate(first_number, operator, second_number):
+    if second_number == '0':
+        return 'NOT DEFIEND'
     if operator == '+':
         result = float(first_number) + float(second_number)
     elif operator == '-':
@@ -26,11 +28,12 @@ def calculate(first_number, operator, second_number):
     elif operator == '*':
         result = float(first_number) * float(second_number)
     elif operator == '/':
+        if int(second_number) == 0:
+            return 'NOT DEFIEND '
         result = float(first_number) / float(second_number)
     
-    # if result > 10 ** 30:
-    #     return 'out of range'
-    elif result.is_integer():
+
+    if result.is_integer():
         return str(int(result))
     else:
         return str(result)
