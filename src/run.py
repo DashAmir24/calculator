@@ -2,12 +2,17 @@ import streamlit as st
 
 from main import calculate
 
+def storing_numbers(new_number: str):
+    if len(st.session_state.history_num) > 10:
+        del st.session_state.history_num[0]
+    st.session_state.history_num.append(new_number)
 
 def num_input(number):
     if st.session_state.result == '0' or st.session_state.operation:
             st.session_state.result = ''
     if len(st.session_state.result) < 8:
             st.session_state.result += number
+            st.session_state.history_counter = -1
     st.session_state.operation = False
 
 def opt_input(operator):
@@ -16,6 +21,7 @@ def opt_input(operator):
     elif st.session_state.first_number:
         st.session_state.second_number = st.session_state.result
         st.session_state.result = calculate(st.session_state.first_number, st.session_state.operator, st.session_state.second_number)
+        storing_numbers(st.session_state.result)
         st.session_state.second_number = ''
         st.session_state.first_number = st.session_state.result
     else:
@@ -25,11 +31,14 @@ def opt_input(operator):
     st.session_state.operation = True
     st.session_state.operator = operator
     st.session_state.result += '   ' + operator
+    st.session_state.history_counter = -1
 
 if 'result' not in st.session_state:
     st.session_state.result = '0'
     st.session_state.operation = False
     st.session_state.first_number = ''
+    st.session_state.history_num = list()
+    st.session_state.history_counter = -1
 
 st.title(':abacus: CALCULATOR')
 box = st.empty()
@@ -48,6 +57,8 @@ with col1:
     if st.button('=', use_container_width=True) and st.session_state.first_number and not st.session_state.operation:
         st.session_state.result = calculate(st.session_state.first_number, st.session_state.operator, st.session_state.result)
         st.session_state.first_number = ''
+        storing_numbers(st.session_state.result)
+        st.session_state.history_counter = -1
 
 with col2:
     if st.button('2', use_container_width=True):
@@ -65,6 +76,7 @@ with col2:
         if len(st.session_state.result) < 8:
             st.session_state.result += '0'
         st.session_state.operation = False
+        st.session_state.history_counter = -1
 
 with col3:
     if st.button('3', use_container_width=True):
@@ -82,6 +94,7 @@ with col3:
             st.session_state.operation = False
         elif '.' not in st.session_state.result:
             st.session_state.result += '.'
+        st.session_state.history_counter = -1
 
 with col5:
     if st.button('+', use_container_width=True):
@@ -101,7 +114,9 @@ with col6:
          st.session_state.result = '0'
          st.session_state.operation = False
          st.session_state.first_number = ''
+         st.session_state.history_counter = -1
     if st.button('<-', use_container_width=True):
+        st.session_state.history_counter = -1
         if st.session_state.operation:
             st.session_state.result = st.session_state.result[:-4]
             st.session_state.operation = False
@@ -110,6 +125,19 @@ with col6:
             st.session_state.result = st.session_state.result[:-1]
             if not st.session_state.result:
                 st.session_state.result = '0'
+    if st.button('H', use_container_width=True) and st.session_state.history_num:
+        if len(st.session_state.history_num) >= abs(st.session_state.history_counter):
+            st.session_state.result = st.session_state.history_num[st.session_state.history_counter]
+            st.session_state.history_counter -= 1
+        st.session_state.first_number = ''
+        st.session_state.operation = False
+    if st.button('Pi', use_container_width=True):
+        if st.session_state.result == '0' or st.session_state.operation:
+            st.session_state.result = ''
+        if len(st.session_state.result) < 8:
+            st.session_state.result = '3.141592'
+        st.session_state.operation = False
+        st.session_state.history_counter = -1
 
 if 'N' in list(st.session_state.result):
     st.session_state.result = st.session_state.result[:-1]
@@ -118,4 +146,4 @@ if 'N' in list(st.session_state.result):
     st.session_state.operation = False
     st.session_state.first_number = ''
 else:
-    box.text_input('',value=st.session_state.result ,disabled=True,width=320)
+    box.text_input('',value=st.session_state.result ,disabled=True,width=340)
