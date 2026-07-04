@@ -3,11 +3,26 @@ import streamlit as st
 from main import calculate
 
 def storing_numbers(new_number: str):
+    """
+    Store the latest calculated result in the history list.
+
+    Keeps only the last 10 calculated results.
+    
+    Args:
+        new_number (str): The calculated result to be stored.
+    """
     if len(st.session_state.history_num) > 10:
         del st.session_state.history_num[0]
     st.session_state.history_num.append(new_number)
 
-def num_input(number):
+def num_input(number: str):
+    """
+    Handle numeric button input.
+
+    Clears the current display if a new operation has started
+    or the display contains only the default value.
+    """
+
     if st.session_state.result == '0' or st.session_state.operation:
             st.session_state.result = ''
     if len(st.session_state.result) < 8:
@@ -16,6 +31,12 @@ def num_input(number):
     st.session_state.operation = False
 
 def opt_input(operator):
+    """
+    Handle arithmetic operator selection.
+
+    If a previous operation exists, compute the intermediate
+    result before storing the new operator.
+    """
     if st.session_state.operation:
         st.session_state.result = st.session_state.result[:-4]
     elif st.session_state.first_number:
@@ -33,12 +54,18 @@ def opt_input(operator):
     st.session_state.result += '   ' + operator
     st.session_state.history_counter = -1
 
-if 'result' not in st.session_state:
-    st.session_state.result = '0'
+def reset_cal():
+    """
+    Reset calculator state for a new calculation.
+    """
     st.session_state.operation = False
     st.session_state.first_number = ''
-    st.session_state.history_num = list()
     st.session_state.history_counter = -1
+
+if 'result' not in st.session_state:
+    st.session_state.result = '0'
+    st.session_state.history_num = list()
+    reset_cal()
 
 st.title(':abacus: CALCULATOR')
 box = st.empty()
@@ -71,12 +98,7 @@ with col2:
         num_input('8')
 
     if st.button('0', use_container_width=True):
-        if st.session_state.result == '0' or st.session_state.operation:
-            st.session_state.result = ''
-        if len(st.session_state.result) < 8:
-            st.session_state.result += '0'
-        st.session_state.operation = False
-        st.session_state.history_counter = -1
+        num_input('0')
 
 with col3:
     if st.button('3', use_container_width=True):
@@ -111,16 +133,13 @@ with col5:
 
 with col6:
     if st.button('c', use_container_width=True):
-         st.session_state.result = '0'
-         st.session_state.operation = False
-         st.session_state.first_number = ''
-         st.session_state.history_counter = -1
+        st.session_state.result = '0'
+        reset_cal()
     if st.button('<-', use_container_width=True):
         st.session_state.history_counter = -1
         if st.session_state.operation:
             st.session_state.result = st.session_state.result[:-4]
-            st.session_state.operation = False
-            st.session_state.first_number = ''
+            reset_cal()
         elif st.session_state.result:
             st.session_state.result = st.session_state.result[:-1]
             if not st.session_state.result:
@@ -143,7 +162,6 @@ if 'N' in list(st.session_state.result):
     st.session_state.result = st.session_state.result[:-1]
     box.text_input('',value=st.session_state.result ,disabled=True,width=320)
     st.session_state.result = '0'
-    st.session_state.operation = False
-    st.session_state.first_number = ''
+    reset_cal()
 else:
     box.text_input('',value=st.session_state.result ,disabled=True,width=340)
